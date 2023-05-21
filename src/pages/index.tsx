@@ -1,7 +1,13 @@
 import React from "react";
+import Repositories from "../components/repoList";
 
-const Home = () => {
-  return <h1>Hello, World!</h1>;
+const HomePage: React.FC = () => {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-4">Public Repositories</h1>
+      <Repositories />
+    </div>
+  );
 };
 
-export default Home;
+export default HomePage;
