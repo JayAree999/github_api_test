@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import { Octokit } from "@octokit/core";
-import styles from '../../styles/repoList.module.css';
+import styles from "../../styles/repoList.module.css";
 
 interface Repo {
   id: number;
@@ -17,7 +17,7 @@ const octokit = new Octokit({
   auth: process.env.REACT_APP_GITHUB_TOKEN,
 });
 
-export default function Repositories() { 
+export default function Repositories() {
   const [repos, setRepos] = useState<Repo[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [inputPage, setInputPage] = useState("");
@@ -29,30 +29,36 @@ export default function Repositories() {
       try {
         await fetchRepos(0);
       } catch (error) {
-        console.error('Error fetching repos in useEffect:', error);
+        console.error("Error fetching repos in useEffect:", error);
       }
     })();
-}, []);
+  }, []);
 
   const fetchRepos = async (since: number) => {
     try {
       let currentSince = since;
       for (let i = 0; i < pagesToLoad; i++) {
-        const response = await octokit.request('GET /repositories', {
+        const response = await octokit.request("GET /repositories", {
           since: currentSince,
         });
         if (response.data.length > 0) {
-          setRepos(repos => [...repos, ...response.data.slice(0, reposPerPage)]);
+          setRepos((repos) => [
+            ...repos,
+            ...response.data.slice(0, reposPerPage),
+          ]);
           currentSince = response.data[response.data.length - 1].id;
         }
       }
     } catch (error) {
-      console.error('Error getting repos:', error);
+      console.error("Error getting repos:", error);
     }
   };
 
   const totalPages = Math.ceil(repos.length / reposPerPage);
-  const reposToDisplay = repos.slice(currentPage * reposPerPage, (currentPage + 1) * reposPerPage);
+  const reposToDisplay = repos.slice(
+    currentPage * reposPerPage,
+    (currentPage + 1) * reposPerPage
+  );
 
   const gotoPage = () => {
     const page = parseInt(inputPage);
@@ -61,42 +67,65 @@ export default function Repositories() {
     } else {
       alert(`Please enter a valid page number between 1 and ${totalPages}`);
     }
-  }
+  };
   return (
     <div className={styles.container}>
       <h1 className={styles.header}>Public Repositories</h1>
       <div className={styles.inputContainer}>
-        <input type="text" value={inputPage} onChange={(e) => setInputPage(e.target.value)} className={styles.input} />
-        <button onClick={gotoPage} className={styles.button}>Go to page</button>
+        <input
+          type="text"
+          value={inputPage}
+          onChange={(e) => setInputPage(e.target.value)}
+          className={styles.input}
+        />
+        <button onClick={gotoPage} className={styles.button}>
+          Go to page
+        </button>
       </div>
-      <p>Page {currentPage + 1} of {totalPages}</p>
+      <p>
+        Page {currentPage + 1} of {totalPages}
+      </p>
       <div className={styles.reposContainer}>
         {reposToDisplay.map((repo: Repo, index: number) => (
           <div key={repo.id} className={styles.repo} data-testid="repo">
-            <p className={styles.repoName} data-testid="repo-name">{index + 1}. {repo.name}</p>
+            <p className={styles.repoName} data-testid="repo-name">
+              {index + 1}. {repo.name}
+            </p>
             <p className={styles.owner}>by {repo.owner.login}</p>
-            <a href={repo.html_url} target="_blank" rel="noreferrer" className={styles.link} data-testid="repo-link">{repo.html_url}</a>
+            <a
+              href={repo.html_url}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.link}
+              data-testid="repo-link"
+            >
+              {repo.html_url}
+            </a>
           </div>
         ))}
       </div>
       <div className={styles.pagination}>
-        <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 0} className={styles.button}>
+        <button
+          onClick={() => setCurrentPage(currentPage - 1)}
+          disabled={currentPage === 0}
+          className={styles.button}
+        >
           Prev
         </button>
-        <button onClick={() => {
-  setCurrentPage(currentPage + 1);
-  if ((currentPage + 1) * reposPerPage >= repos.length) {
-    fetchRepos(repos[repos.length - 1].id).catch(error => {
-      console.error('Error fetching more repos:', error);
-    });
-  }
-}} className={styles.button}>
-  Next
-</button>
-
+        <button
+          onClick={() => {
+            setCurrentPage(currentPage + 1);
+            if ((currentPage + 1) * reposPerPage >= repos.length) {
+              fetchRepos(repos[repos.length - 1].id).catch((error) => {
+                console.error("Error fetching more repos:", error);
+              });
+            }
+          }}
+          className={styles.button}
+        >
+          Next
+        </button>
       </div>
     </div>
   );
-}  
-
-  
+}
