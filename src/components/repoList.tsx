@@ -17,7 +17,7 @@ const octokit = new Octokit({
   auth: process.env.REACT_APP_GITHUB_TOKEN,
 });
 
-const ReposList: React.FC = () => {
+export default function Repositories() { 
   const [repos, setRepos] = useState<Repo[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [inputPage, setInputPage] = useState("");
@@ -55,8 +55,7 @@ const ReposList: React.FC = () => {
     } else {
       alert(`Please enter a valid page number between 1 and ${totalPages}`);
     }
-  };
-
+  }
   return (
     <div className={styles.container}>
       <h1 className={styles.header}>Public Repositories</h1>
@@ -67,10 +66,10 @@ const ReposList: React.FC = () => {
       <p>Page {currentPage + 1} of {totalPages}</p>
       <div className={styles.reposContainer}>
         {reposToDisplay.map((repo: Repo, index: number) => (
-          <div key={repo.id} className={styles.repo}>
-            <p className={styles.repoName}>{index + 1}. {repo.name}</p>
+          <div key={repo.id} className={styles.repo} data-testid="repo">
+            <p className={styles.repoName} data-testid="repo-name">{index + 1}. {repo.name}</p>
             <p className={styles.owner}>by {repo.owner.login}</p>
-            <p><a href={repo.html_url} target="_blank" rel="noreferrer" className={styles.link}>{repo.html_url}</a></p>
+            <a href={repo.html_url} target="_blank" rel="noreferrer" className={styles.link} data-testid="repo-link">{repo.html_url}</a>
           </div>
         ))}
       </div>
@@ -89,6 +88,6 @@ const ReposList: React.FC = () => {
       </div>
     </div>
   );
-    }  
+}  
 
-export default ReposList;
+  
