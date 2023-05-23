@@ -1,9 +1,8 @@
 import React from 'react';
 import { render, screen , fireEvent} from '@testing-library/react';
 import Repositories from '../../src/components/repoList';  // update the path based on your project structure
-import { act } from 'react-dom/test-utils';
 
-import fetchMock from 'jest-fetch-mock';
+
 const mockRepos = Array.from({ length: 10 }, (_, index) => ({
     id: index + 1,
     name: `Repo${index + 1}`,

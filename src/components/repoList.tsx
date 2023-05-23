@@ -25,8 +25,14 @@ export default function Repositories() {
   const pagesToLoad = 10;
 
   useEffect(() => {
-    fetchRepos(0);
-  }, []);
+    (async () => {
+      try {
+        await fetchRepos(0);
+      } catch (error) {
+        console.error('Error fetching repos in useEffect:', error);
+      }
+    })();
+}, []);
 
   const fetchRepos = async (since: number) => {
     try {
@@ -78,13 +84,16 @@ export default function Repositories() {
           Prev
         </button>
         <button onClick={() => {
-          setCurrentPage(currentPage + 1);
-          if ((currentPage + 1) * reposPerPage >= repos.length) {
-            fetchRepos(repos[repos.length - 1].id);
-          }
-        }} className={styles.button}>
-          Next
-        </button>
+  setCurrentPage(currentPage + 1);
+  if ((currentPage + 1) * reposPerPage >= repos.length) {
+    fetchRepos(repos[repos.length - 1].id).catch(error => {
+      console.error('Error fetching more repos:', error);
+    });
+  }
+}} className={styles.button}>
+  Next
+</button>
+
       </div>
     </div>
   );
