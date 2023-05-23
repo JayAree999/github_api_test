@@ -1,72 +1,94 @@
-import React, { useEffect, useState } from "react";
-import { Octokit } from "@octokit/rest";
+import React, { useEffect, useState } from 'react';
+import { Octokit } from "@octokit/core";
+import styles from '../../styles/repoList.module.css';
 
-const octokit = new Octokit({});
-
-async function fetchRepositories(page: number, perPage: number) {
-  const response = await octokit.request("GET /repositories");
-
-  const startIndex = (page - 1) * perPage;
-  const endIndex = page * perPage;
-  const repositories = response.data.slice(startIndex, endIndex);
-
-  return repositories;
+interface Repo {
+  id: number;
+  node_id: string;
+  name: string;
+  full_name: string;
+  owner: {
+    login: string;
+  };
+  html_url: string;
 }
 
-const Repositories: React.FC = () => {
-  const [repositories, setRepositories] = useState<any[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
+const octokit = new Octokit({
+  auth: process.env.REACT_APP_GITHUB_TOKEN,
+});
+
+const ReposList: React.FC = () => {
+  const [repos, setRepos] = useState<Repo[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [inputPage, setInputPage] = useState("");
+  const reposPerPage = 10;
+  const pagesToLoad = 10;
 
   useEffect(() => {
-    async function displayRepositories() {
-      const fetchedRepositories = await fetchRepositories(currentPage, 10);
-      setRepositories(fetchedRepositories);
+    fetchRepos(0);
+  }, []);
+
+  const fetchRepos = async (since: number) => {
+    try {
+      let currentSince = since;
+      for (let i = 0; i < pagesToLoad; i++) {
+        const response = await octokit.request('GET /repositories', {
+          since: currentSince,
+        });
+        if (response.data.length > 0) {
+          setRepos(repos => [...repos, ...response.data.slice(0, reposPerPage)]);
+          currentSince = response.data[response.data.length - 1].id;
+        }
+      }
+    } catch (error) {
+      console.error('Error getting repos:', error);
     }
-
-    displayRepositories();
-  }, [currentPage]);
-
-  const handleNextPage = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
   };
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prevPage) => prevPage - 1);
+  const totalPages = Math.ceil(repos.length / reposPerPage);
+  const reposToDisplay = repos.slice(currentPage * reposPerPage, (currentPage + 1) * reposPerPage);
+
+  const gotoPage = () => {
+    const page = parseInt(inputPage);
+    if (!isNaN(page) && page >= 1 && page <= totalPages) {
+      setCurrentPage(page - 1);
+    } else {
+      alert(`Please enter a valid page number between 1 and ${totalPages}`);
     }
   };
 
   return (
-    <div>
-      {repositories.map((repo) => (
-        <div key={repo.id} className="bg-gray-100 p-4 my-2 rounded">
-          <div>
-            <span className="font-bold">ID: </span>
-            {repo.id}
+    <div className={styles.container}>
+      <h1 className={styles.header}>Public Repositories</h1>
+      <div className={styles.inputContainer}>
+        <input type="text" value={inputPage} onChange={(e) => setInputPage(e.target.value)} className={styles.input} />
+        <button onClick={gotoPage} className={styles.button}>Go to page</button>
+      </div>
+      <p>Page {currentPage + 1} of {totalPages}</p>
+      <div className={styles.reposContainer}>
+        {reposToDisplay.map((repo: Repo, index: number) => (
+          <div key={repo.id} className={styles.repo}>
+            <p className={styles.repoName}>{index + 1}. {repo.name}</p>
+            <p className={styles.owner}>by {repo.owner.login}</p>
+            <p><a href={repo.html_url} target="_blank" rel="noreferrer" className={styles.link}>{repo.html_url}</a></p>
           </div>
-          <div>
-            <span className="font-bold">Full Name: </span>
-            {repo.full_name}
-          </div>
-        </div>
-      ))}
-      <div className="mt-4">
-        <button
-          onClick={handlePreviousPage}
-          disabled={currentPage === 1}
-          className="px-4 py-2 mr-2 bg-blue-500 text-white rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          Previous Page
+        ))}
+      </div>
+      <div className={styles.pagination}>
+        <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 0} className={styles.button}>
+          Prev
         </button>
-        <button
-          onClick={handleNextPage}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          Next Page
+        <button onClick={() => {
+          setCurrentPage(currentPage + 1);
+          if ((currentPage + 1) * reposPerPage >= repos.length) {
+            fetchRepos(repos[repos.length - 1].id);
+          }
+        }} className={styles.button}>
+          Next
         </button>
       </div>
     </div>
   );
-};
+    }  
 
-export default Repositories;
+export default ReposList;
