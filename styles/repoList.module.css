@@ -27,7 +27,7 @@
 }
 
 .input {
-  @apply border rounded w-24 mr-2 py-1 px-2;
+  @apply border-2 border-gray-600 text-gray-700 rounded w-24 mr-2 py-1 px-2;
 }
 
 .reposContainer {

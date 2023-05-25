@@ -112,6 +112,7 @@ export default function Repositories() {
         >
           Prev
         </button>
+        Will load 10 more pages on the last page
         <button
           onClick={() => {
             setCurrentPage(currentPage + 1);
