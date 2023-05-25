@@ -57,7 +57,12 @@ export default {
 
   // Force coverage collection from ignored files using an array of glob patterns
   // forceCoverageMatch: [],
-  coveragePathIgnorePatterns: ['node_modules/', 'babel.config.js', 'index.tsx', 'app.tsx'],
+  coveragePathIgnorePatterns: [
+    "node_modules/",
+    "babel.config.js",
+    "index.tsx",
+    "app.tsx",
+  ],
   // A path to a module which exports an async function that is triggered once before all test suites
   // globalSetup: undefined,
 

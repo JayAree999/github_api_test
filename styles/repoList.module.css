@@ -31,7 +31,7 @@
 }
 
 .reposContainer {
-  @apply grid grid-cols-2 gap-4;
+  @apply grid grid-cols-2 gap-4 h-128 overflow-auto;
 }
 
 .repo {
@@ -51,5 +51,5 @@
 }
 
 .link {
-  @apply text-blue-500 hover:text-blue-700;
+  @apply text-blue-500 hover:text-blue-700 break-words;
 }

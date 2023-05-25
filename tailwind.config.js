@@ -15,4 +15,12 @@ module.exports = {
     },
   },
   plugins: [],
+
+  theme: {
+    extend: {
+      height: {
+        128: "40rem",
+      },
+    },
+  },
 };
